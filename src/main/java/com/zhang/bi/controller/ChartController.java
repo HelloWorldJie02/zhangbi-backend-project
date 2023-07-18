@@ -7,23 +7,28 @@ import com.zhang.bi.common.BaseResponse;
 import com.zhang.bi.common.DeleteRequest;
 import com.zhang.bi.common.ErrorCode;
 import com.zhang.bi.common.ResultUtils;
+import com.zhang.bi.constant.FileConstant;
 import com.zhang.bi.constant.UserConstant;
 import com.zhang.bi.exception.BusinessException;
 import com.zhang.bi.exception.ThrowUtils;
-import com.zhang.bi.model.dto.chart.ChartAddRequest;
-import com.zhang.bi.model.dto.chart.ChartEditRequest;
-import com.zhang.bi.model.dto.chart.ChartQueryRequest;
-import com.zhang.bi.model.dto.chart.ChartUpdateRequest;
+import com.zhang.bi.model.dto.chart.*;
+import com.zhang.bi.model.dto.file.UploadFileRequest;
 import com.zhang.bi.model.entity.Chart;
 import com.zhang.bi.model.entity.User;
+import com.zhang.bi.model.enums.FileUploadBizEnum;
 import com.zhang.bi.service.ChartService;
 import com.zhang.bi.service.UserService;
+import com.zhang.bi.utils.ExcelUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
 
 /**
  * 帖子接口
@@ -202,6 +207,35 @@ public class ChartController {
         }
         boolean result = chartService.updateById(chart);
         return ResultUtils.success(result);
+    }
+
+    /**
+     * 智能分析
+     * @param multipartFile
+     * @param genChartByAiRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/gen")
+    public BaseResponse<String> getChartByAi(@RequestPart("file") MultipartFile multipartFile,
+                                             GenChartByAiRequest genChartByAiRequest, HttpServletRequest request) {
+
+        String chartName = genChartByAiRequest.getChartName();
+        String goal = genChartByAiRequest.getGoal();
+        String chartType = genChartByAiRequest.getChartType();
+        //校验
+        ThrowUtils.throwIf(StringUtils.isBlank(goal),ErrorCode.PARAMS_ERROR, "请求目标为空");
+        ThrowUtils.throwIf(StringUtils.isNotBlank(chartName) && chartName.length() > 50,
+                ErrorCode.PARAMS_ERROR, "图标名称过长");
+
+        //输入预设拼接
+        StringBuilder userInput = new StringBuilder();
+        String result = ExcelUtils.excelToCsv(multipartFile);
+        userInput.append("你是一个数据分析师，下面我将给出分析目标和原始数据").append("\n")
+                .append("分析目标：").append(goal).append("\n")
+                .append("原始数据：").append(result).append("\n");
+
+        return ResultUtils.success(userInput.toString());
     }
 
 }

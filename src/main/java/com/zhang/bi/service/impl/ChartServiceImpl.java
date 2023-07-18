@@ -38,6 +38,7 @@ public class ChartServiceImpl extends ServiceImpl<ChartMapper, Chart>
 
         Long id = chartQueryRequest.getId();
         Long userId = chartQueryRequest.getUserId();
+        String chartName = chartQueryRequest.getChartName();
         String goal = chartQueryRequest.getGoal();
         String chartType = chartQueryRequest.getChartType();
         String sortField = chartQueryRequest.getSortField();
@@ -45,6 +46,7 @@ public class ChartServiceImpl extends ServiceImpl<ChartMapper, Chart>
 
         // 拼接查询条件
         queryWrapper.eq(id != null && id > 0, "id", id);
+        queryWrapper.like(StringUtils.isNotBlank(chartName), "chartName", chartName);
         queryWrapper.eq(userId > 0, "userId", userId);
         queryWrapper.eq(StringUtils.isNotBlank(goal), "goal", goal);
         queryWrapper.eq(StringUtils.isNotBlank(chartType), "chartType", chartType);
