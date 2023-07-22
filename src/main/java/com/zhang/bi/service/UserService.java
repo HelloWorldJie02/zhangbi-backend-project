@@ -6,9 +6,8 @@ import com.zhang.bi.model.dto.user.UserQueryRequest;
 import com.zhang.bi.model.entity.User;
 import com.zhang.bi.model.vo.LoginUserVO;
 import com.zhang.bi.model.vo.UserVO;
-import java.util.List;
 import javax.servlet.http.HttpServletRequest;
-import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
+import java.util.List;
 
 /**
  * 用户服务

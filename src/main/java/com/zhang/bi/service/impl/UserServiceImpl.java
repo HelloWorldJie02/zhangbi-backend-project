@@ -15,7 +15,6 @@ import com.zhang.bi.model.vo.UserVO;
 import com.zhang.bi.service.UserService;
 import com.zhang.bi.utils.SqlUtils;
 import lombok.extern.slf4j.Slf4j;
-import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -30,9 +29,6 @@ import static com.zhang.bi.constant.UserConstant.USER_LOGIN_STATE;
 
 /**
  * 用户服务实现
- *
- * 
- * 
  */
 @Service
 @Slf4j

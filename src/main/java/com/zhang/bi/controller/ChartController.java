@@ -1,6 +1,6 @@
 package com.zhang.bi.controller;
-import java.util.Date;
 
+import cn.hutool.core.io.FileUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.gson.Gson;
 import com.zhang.bi.annotation.AuthCheck;
@@ -12,6 +12,7 @@ import com.zhang.bi.constant.UserConstant;
 import com.zhang.bi.exception.BusinessException;
 import com.zhang.bi.exception.ThrowUtils;
 import com.zhang.bi.manager.AiManager;
+import com.zhang.bi.manager.RedisLimiterManager;
 import com.zhang.bi.model.dto.chart.*;
 import com.zhang.bi.model.entity.Chart;
 import com.zhang.bi.model.entity.User;
@@ -27,6 +28,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * 帖子接口
@@ -46,6 +49,9 @@ public class ChartController {
     @Resource
     private AiManager aiManager;
 
+    @Resource
+    private RedisLimiterManager redisLimiterManager;
+
     private final static Gson GSON = new Gson();
 
     /**
@@ -61,12 +67,23 @@ public class ChartController {
         String chartName = genChartByAiRequest.getChartName();
         String goal = genChartByAiRequest.getGoal();
         String chartType = genChartByAiRequest.getChartType();
+        User loginUser = userService.getLoginUser(request);
+        //限流，针对每个用户使用该方法
+        redisLimiterManager.doRateLimit("getChartByAi_" + loginUser.getId());
         //校验
         ThrowUtils.throwIf(StringUtils.isBlank(goal),ErrorCode.PARAMS_ERROR, "请求目标为空");
         ThrowUtils.throwIf(StringUtils.isNotBlank(chartName) && chartName.length() > 50,
                 ErrorCode.PARAMS_ERROR, "图标名称过长");
-        User loginUser = userService.getLoginUser(request);
-
+        //校验文件
+        long fileSize = multipartFile.getSize();
+        String filename = multipartFile.getOriginalFilename();
+        //校验文件大小
+        final long ONE_MB = 1024 * 1024L;
+        ThrowUtils.throwIf(fileSize > ONE_MB, ErrorCode.PARAMS_ERROR, "文件过大");
+        //校验文件后缀
+        String suffix = FileUtil.getSuffix(filename);
+        final List<String> vaildFileSuffixList = Arrays.asList("png","jpg", "svg", "webp", "jpeg");
+        ThrowUtils.throwIf(!vaildFileSuffixList.contains(suffix), ErrorCode.PARAMS_ERROR, "文件格式错误");
         //压缩后的数据
         String csvData = ExcelUtils.excelToCsv(multipartFile);
         final long biModelId = 1659171950288818178L;
@@ -244,7 +261,7 @@ public class ChartController {
 
 
     /**
-     * 编辑（用户）
+     * 编辑
      *
      * @param chartEditRequest
      * @param request
