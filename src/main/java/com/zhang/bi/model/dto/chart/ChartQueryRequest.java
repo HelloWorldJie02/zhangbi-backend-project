@@ -9,6 +9,7 @@ import java.io.Serializable;
 /**
  * 查询请求
  *
+ * @author ZHANG
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -38,6 +39,11 @@ public class ChartQueryRequest extends PageRequest implements Serializable {
      * 创建图标用户 id
      */
     private Long userId;
+
+    /**
+     * 图标状态
+     */
+    private String chartStatus;
 
     private static final long serialVersionUID = 1L;
 }

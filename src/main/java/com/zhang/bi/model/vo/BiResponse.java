@@ -4,6 +4,12 @@ import lombok.Data;
 
 @Data
 public class BiResponse {
+
+    /**
+     * 图标id
+     */
+    private Long chartId;
+
     /**
      * 生成的图表信息
      */
